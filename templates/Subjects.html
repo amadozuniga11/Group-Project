@@ -1,0 +1,13 @@
+<html>
+<head>
+  <link rel ="stylesheet" href = "static/Subjects.css"
+</head>
+<!--head etc-->
+<body>
+  <div>{{ Title }}</div>
+  <!-- you can iterate on a list to add many items -->
+  {% for s in Subjects %}
+    <button class = "SubjectButton">{{ s }}</button>
+  {% endfor %}
+</body>
+</html>
