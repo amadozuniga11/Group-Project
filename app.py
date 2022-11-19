@@ -1,12 +1,12 @@
 
-from flask import Flask, render_template
-
+from flask import Flask, render_template, session, url_for, request
+import pandas as pd
+import json
 app = Flask(__name__)
-
+app.secret_key = "dljsaklqk24e21cjn!Ew@@dsa5"
 #@app.route("/")
 #def home_page():
-import pandas as pd
-class fileInfo:
+class fileIn:
   def __init__(self, filename):
     self.file = pd.read_csv(filename, sep = ",")
   def information(self):
@@ -34,17 +34,53 @@ class fileInfo:
     print(f"Top 5 Best Sellers:\n{self.file['Author']}")
     return render_template("base.html")
 
-class fileTest:
+class fileInfo:
   def __init__(self, filename):
     self.file = pd.read_csv(filename, sep = ",")
-  def displaySubjects(self,title, type):
-    res =  render_template("Subjects.html",title=title, subjects=self.file[type].unique())
+  def displayColumns(self,title, type):
+    res =  render_template("subjects.html",title=title, Subjects=self.file[type].unique())
     return res
+
+def serveButtons(html, content,title):
+    URLS = []
+    print("-------------------------------------------------------------------------------")
+    print(request.path)
+    currPath = request.path
+    for s in content:
+      string = s.replace(' ','')
+      URLS.append(f"{currPath}{string}/")
+    res =  render_template(html,len = len(content),title=title, URLS = URLS,content=content)
+    return res
+
 @app.route('/')
-def render():
-  test = fileTest("Reviews.csv")
-  res = test.displaySubjects("Subjects", "Subject")
+def main():
+  print(request.path)
+  mainDF = pd.read_csv("Reviews.csv", sep = ",")
+  session["mainDF"]= mainDF.to_dict()
+  res = serveButtons("mainPage.html", ["Write Reviews", "View Reviews"], "Rate My Class")
   return res
+  return render_template("mainPage.html", writeReviewsURL= url_for('writeReviews'), viewReviewsURL = url_for('viewReviews'))
+
+@app.route('/WriteReviews/')
+def WriteReviews():
+  file = session.get("mainDF", None)
+  file= pd.DataFrame.from_dict(file)
+  res = serveButtons("subjects.html", file["Subject"].unique(), "Subjects")
+  return res
+
+@app.route('/ViewReviews/')
+def ViewReviews():
+  file = session.get("mainDF", None)
+  file= pd.DataFrame.from_dict(file)
+  res = serveButtons("subjects.html", file["Subject"].unique(), "Subjects")
+  return res
+
+@app.route('/ViewReviews/<subject>/')
+def ViewSubject(subject):
+  file = session.get("mainDF",None)
+  file = pd.DataFrame.from_dict(file)
+  classes = file[file.Subject ==subject]["Classes"].unique()
+  return serveButtons("classes.html", classes,"Classes")
 
 
 #@app.route('/user/<name>')
