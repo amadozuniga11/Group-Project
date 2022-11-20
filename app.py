@@ -3,12 +3,14 @@ import pandas as pd
 import json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
+from flask_migrate import Migrate
 from datetime import datetime
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reviews.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #initialize the database
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 app.app_context().push()
 
 #create db model
@@ -18,6 +20,7 @@ class Reviews(db.Model):
   subjectName = db.Column(db.String(200), nullable = False)
   className = db.Column(db.String(200), nullable = False)
   rating = db.Column(db.Integer, nullable= False)
+  textReview = db.Column(db.Text())
   dateCreated = db.Column(db.DateTime, default = datetime.utcnow)
   #create a function to return a string when we add something
   def __repr__(self):
@@ -33,11 +36,24 @@ def serveButtons(html, content,title):
     res =  render_template(html,len = len(content),title=title, URLS = URLS,content=content)
     return res
 
+def serveReviews(html, subject, Class, title):
+  print(subject)
+  sql = text(
+    "SELECT rating, textReview " 
+    "FROM Reviews "
+    "WHERE subjectName= :subject " 
+    "AND className = :class ")
+  reviewsCursor = db.session.execute(sql,{"subject":subject, "class": Class})
+  reviewListMapping=reviewsCursor.mappings().all()
+  #todo: after database migration, need to pass in a dictionary that maps the ratings, reviews, and date to the respective lists
+  res = render_template(html, reviewListMapping = reviewListMapping, len =len(reviewListMapping), title = title)
+  return res
+
 @app.route('/')
 def main():
   print(request.path)
-  mainDF = pd.read_csv("Reviews.csv", sep = ",")
-  session["mainDF"]= mainDF.to_dict()
+  #mainDF = pd.read_csv("Reviews.csv", sep = ",")
+  #session["mainDF"]= mainDF.to_dict()
   res = serveButtons("mainPage.html", ["Write Reviews", "View Reviews"], "Rate My Class")
   return res
 
@@ -58,14 +74,14 @@ def reviewSubmit():
   Class = request.form.get("class")
   subject = request.form.get("subject")
   rating = request.form.get("rate")
-  new_review = Reviews(subjectName = subject, className = Class, rating = rating)
+  textReview = request.form.get("textReview")
+  new_review = Reviews(subjectName = subject, className = Class, rating = rating, textReview = textReview)
   try:
     db.session.add(new_review)
     db.session.commit()
     return render_template("submission.html")
   except:
     return render_template("submissionFailed.html")
-  print(f"class:{Class}, subject:{subject}, rating:{rating}")
 @app.route('/ViewReviews/<subject>/')
 def ViewSubject(subject):
   #file = session.get("mainDF",None)
@@ -75,3 +91,9 @@ def ViewSubject(subject):
   classesList = [c[0] for c in classesCursor.fetchall()]
   #classes = file[file.Subject ==subject]["Classes"].unique()
   return serveButtons("classes.html", classesList,"Classes")
+
+@app.route('/ViewReviews/<subject>/<Class>/')
+def ViewClass(subject,Class):
+  print(subject)
+  res = serveReviews("reviews.html",subject, Class, f"{Class} Reviews")
+  return res
