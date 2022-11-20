@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
   <link rel ="stylesheet" href = "https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel = "stylesheet" href = "/static/reviews.css">
 </head>
 <!--head etc-->
 <body style="background-color:grey;">
@@ -10,9 +11,7 @@
   {%for i in range(0, len)%}
     <div>
         <div>
-            <p>{{reviewListMapping[i]["rating"]}}</p>
             {%for x in range(0,reviewListMapping[i]["rating"]) %}
-                <p>{{reviewListMapping[i]["rating"]}}</p>
                 <i class="fa fa-star checked"></i>
             {%endfor%}
             {%for x in range(0,(5-reviewListMapping[i]["rating"]))%}
@@ -23,7 +22,7 @@
         <p>No Review</p>
         {% endif %}
         {% if reviewListMapping[i]["textReview"] is not none %}
-        <p>No Review</p>
+        <p>{{reviewListMapping[i]["textReview"]}}</p>
         {% endif %}
     </div>
   {%endfor%}
