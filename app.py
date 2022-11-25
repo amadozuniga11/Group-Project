@@ -41,7 +41,7 @@ class Reviews(db.Model):
     return '<Name %r>' % self.id
 
 class ReviewForm(FlaskForm):
-  className = StringField("Class Name:", validators = [DataRequired()])
+  className = StringField("Class Name:",validators = [DataRequired()])
   SubjectName = StringField("Subject Name:", validators = [DataRequired()])
   rate = RadioField('Rating', choices =[(5,"star5"),(4,"star4"), (3,"star3"), (2, "star2"), (1, "star1")])
   reviewText = TextAreaField("Review:", validators = [DataRequired()])
@@ -71,12 +71,15 @@ def serveButtons(html, content,title):
     URLS = []
     currPath = request.path
     for s in content:
-      string = s.replace(' ','')
+      string = s.replace(' ','-')
       URLS.append(f"{currPath}{string}/")
     res =  render_template(html,len = len(content),title=title, URLS = URLS,content=content)
     return res
 
 def serveReviews(html, subject, Class, title):
+  Class = Class.replace('-',' ')
+  subject = subject.replace('-', ' ')
+  title = title.replace('-', ' ')
   sql = text(
     "SELECT rating, textReview " 
     "FROM Reviews "
@@ -93,7 +96,7 @@ def main():
   res = serveButtons("mainPage.html", ["Write Reviews", "View Reviews"], "Rate My Class")
   return res
 
-@app.route('/WriteReviews/', methods = ['GET', 'POST'])
+@app.route('/Write-Reviews/', methods = ['GET', 'POST'])
 def WriteReviews():
   Class = None
   subject = None
@@ -112,13 +115,13 @@ def WriteReviews():
     return redirect(url_for('reviewSubmit', Class = Class, subject = subject,rating= rating, reviewText = reviewText))
   res = render_template("writeReview.html", Class = Class,subject = subject,rating = rating, form = form)
   return res
-@app.route('/ViewReviews/')
+@app.route('/View-Reviews/')
 def ViewReviews():
   subjectsCursor = db.session.execute('SELECT DISTINCT subjectName FROM Reviews')
   subjectsList = [s[0] for s in subjectsCursor.fetchall()]
   res = serveButtons("subjects.html", subjectsList, "Subjects")
   return res
-@app.route('/WriteReviews/Submit', methods = ["GET","POST"])
+@app.route('/Write-Reviews/Submit', methods = ["GET","POST"])
 def reviewSubmit():
   subject = request.args['subject']
   Class = request.args['Class']
@@ -131,15 +134,23 @@ def reviewSubmit():
     return render_template("submission.html")
   except:
     return render_template("submissionFailed.html")
-@app.route('/ViewReviews/<subject>/')
+@app.route('/View-Reviews/<subject>/')
 def ViewSubject(subject):
   sql = text('SELECT DISTINCT className from Reviews WHERE subjectName= :subject')
   classesCursor = db.session.execute(sql,{"subject":subject})
   classesList = [c[0] for c in classesCursor.fetchall()]
   return serveButtons("classes.html", classesList,"Classes")
 
-@app.route('/ViewReviews/<subject>/<Class>/')
+@app.route('/View-Reviews/<subject>/<Class>/')
 def ViewClass(subject,Class):
+  #delete = text("DELETE FROM Reviews WHERE id=12")
+  sql = text("SELECT * FROM Reviews")
+  #db.session.execute(delete)
+  #Reviews.query.filter_by(id=12).delete()
+  reviewsCursor = db.session.execute(sql)
+  reviewMapping = reviewsCursor.mappings().all()
+  #db.session.commit()
+  print(reviewMapping)
   print(subject)
   res = serveReviews("reviews.html",subject, Class, f"{Class} Reviews")
   return res
