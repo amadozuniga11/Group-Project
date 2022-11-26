@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <head>
-  <link rel ="stylesheet" href = "static/Subjects.css">
+  <link rel ="stylesheet" href = "/static/subjects.css">
+  <title>Subjects</title>
 </head>
+<div class="header">
 <!--head etc-->
 <body style="background-color:grey;">
   <h1>{{ title }}</h1>
   <!-- you can iterate on a list to add many items -->
   {%for i in range(0, len)%}
     <a href={{URLS[i]}}>
-      <button>{{ content[i] }}</button>
+      <button class="button"><div class="demo-grab">{{ content[i] }}</div></button>
     </a>
   {%endfor%}
+  </a>
 </body>
+</div>

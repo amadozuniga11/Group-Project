@@ -1,0 +1,38 @@
+h1{
+    border: 2px #eee solid; 
+    color: white; 
+    text-align:center; 
+    padding: 10px;
+}
+body{
+    text-align: center;
+    margin: 0px; 
+    overflow: hidden;
+    
+}
+.header{
+    height: 100vh;
+    width: 100vw;
+    margin: 0px;
+    background-image:url("/static/schoolBackground.jpg");
+    background-size: cover;
+    background-position: bottom;
+    background-blend-mode:color-burn;
+    background-color: #908d8d59;
+}
+div.demo-grab{
+    cursor:grab;
+}
+.button{
+    background-color: #555555;
+    border:none;
+    color:white;
+    padding:15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display:inline-block;
+    font-size:16px;
+}
+button:hover{
+    color:blue;
+}

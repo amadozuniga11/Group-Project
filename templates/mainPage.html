@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <head>
   <link rel ="stylesheet" href = "static/mainPage.css">
+  <title>Rate My Class</title>
 </head>
+<div class="header">
 <!--head etc-->
 <body style="background-color:grey;">
   <!-- you can iterate on a list to add many items -->
@@ -9,8 +11,9 @@
   <!-- you can iterate on a list to add many items -->
   {%for i in range(0, len)%}
     <a href={{URLS[i]}}>
-      <button>{{ content[i] }}</button>
+    <button class="button"><div class="demo-grab">{{ content[i] }}</div></button>
     </a>
   {%endfor%}
   </a> 
 </body>
+</div>
